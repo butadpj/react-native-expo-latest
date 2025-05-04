@@ -1,80 +1,207 @@
-import { Image } from "expo-image";
-import { Platform, StyleSheet, Text } from "react-native";
+import { Dimensions, Image, Pressable, SectionList, View } from 'react-native';
 
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { useRouter } from 'expo-router';
+
+const movieSections = [
+  {
+    title: 'Popular movies',
+    data: [
+      {
+        id: 1,
+        title: 'The Shawshank Redemption',
+        year: '1994',
+        rating: '9.3',
+        poster: '/placeholder.svg?height=600&width=400',
+        genre: ['Drama'],
+        director: 'Frank Darabont',
+        description:
+          'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.',
+      },
+      {
+        id: 2,
+        title: 'The Godfather',
+        year: '1972',
+        rating: '9.2',
+        poster: '/placeholder.svg?height=600&width=400',
+        genre: ['Crime', 'Drama'],
+        director: 'Francis Ford Coppola',
+        description:
+          'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.',
+      },
+      {
+        id: 3,
+        title: 'The Dark Knight',
+        year: '2008',
+        rating: '9.0',
+        poster: '/placeholder.svg?height=600&width=400',
+        genre: ['Action', 'Crime', 'Drama'],
+        director: 'Christopher Nolan',
+        description:
+          'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.',
+      },
+    ],
+  },
+  {
+    title: 'New movies',
+    data: [
+      {
+        id: 1,
+        title: 'The Shawshank Redemption',
+        year: '1994',
+        rating: '9.3',
+        poster: '/placeholder.svg?height=600&width=400',
+        genre: ['Drama'],
+        director: 'Frank Darabont',
+        description:
+          'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.',
+      },
+      {
+        id: 2,
+        title: 'The Godfather',
+        year: '1972',
+        rating: '9.2',
+        poster: '/placeholder.svg?height=600&width=400',
+        genre: ['Crime', 'Drama'],
+        director: 'Francis Ford Coppola',
+        description:
+          'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.',
+      },
+      {
+        id: 3,
+        title: 'The Dark Knight',
+        year: '2008',
+        rating: '9.0',
+        poster: '/placeholder.svg?height=600&width=400',
+        genre: ['Action', 'Crime', 'Drama'],
+        director: 'Christopher Nolan',
+        description:
+          'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.',
+      },
+    ],
+  },
+];
+
+interface Movie {
+  id: number | string;
+  poster?: string | null;
+  title: string;
+  year: string | number;
+  rating: string | number;
+}
+
+interface MovieGridProps {
+  movies: Movie[];
+}
+
+// --- Optional: Calculate columns based on screen width ---
+const { width } = Dimensions.get('window');
+const calculateNumColumns = () => {
+  if (width >= 1024) return 5; // lg
+  if (width >= 768) return 4; // md
+  if (width >= 640) return 3; // sm
+  return 2; // default
+};
+const NUM_COLUMNS = calculateNumColumns();
+const GAP = 16; // Corresponds to gap-4 (4 * 4 = 16)
+
+// Reusable Movie Card Component (Pure NativeWind)
+const MovieCard = ({ movie }: { movie: Movie }) => {
+  const router = useRouter();
+
+  const handlePress = () => {
+    router.push({
+      pathname: `/`,
+    }); // Navigate on press
+  };
+
+  // Determine image source, using placeholder if poster is missing
+  const imageSource = movie.poster
+    ? { uri: movie.poster }
+    : '../../assets/images/partial-react-logo.png';
+
+  return (
+    <Pressable
+      onPress={handlePress}
+      // Apply base styles and use `pressed:` variant for shadow change
+      // Use flex-1 to allow items to grow within the FlatList column structure
+      // Add margin for vertical gap between rows
+      className="border-border bg-card pressed:shadow-lg mb-4 flex-1 overflow-hidden rounded-lg border shadow" // mb-4 adds vertical gap
+      // Remove inline style for margin if mb-4 is sufficient
+      // style={{ margin: GAP / 2 }} // Alternative gap handling
+    >
+      {/* Image Container */}
+      <View className="relative aspect-video">
+        {/* Image using NativeWind for absolute positioning */}
+        <Image
+          source={require('../../assets/images/partial-react-logo.png')}
+          alt={movie.title}
+          // Use NativeWind classes for fill effect
+          className="absolute inset-0 h-full w-full"
+          resizeMode="cover" // Equivalent to object-cover
+        />
+        {/* Rating Badge */}
+        <View className="absolute right-2 top-2">
+          <View className="rounded bg-black/70 px-1.5 py-0.5">
+            <ThemedText className="text-xs font-medium text-white">
+              {movie.rating}
+            </ThemedText>
+          </View>
+        </View>
+      </View>
+
+      {/* Text Content */}
+      <View className="p-3">
+        <ThemedText
+          numberOfLines={1} // Equivalent to line-clamp-1
+          // Use `pressed:` variant for text color change
+          type={'subtitle'}
+          className="pressed:text-primary font-medium"
+        >
+          {movie.title}
+        </ThemedText>
+        <ThemedText className="text-muted-foreground text-sm">
+          {movie.year}
+        </ThemedText>
+      </View>
+    </Pressable>
+  );
+};
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <Text className="text-white text-2xl">Welcome!</Text>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-          to see changes. Press{" "}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: "cmd + d",
-              android: "cmd + m",
-              web: "F12",
-            })}
-          </ThemedText>{" "}
-          to open developer tools.
+    <ThemedView className="flex-1 px-4 pb-40 pt-10">
+      <View className="mb-10">
+        <ThemedText type={'title'} className="text-5xl">
+          Movies
         </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">
-            npm run reset-project
-          </ThemedText>{" "}
-          to get a fresh <ThemedText type="defaultSemiBold">app</ThemedText>{" "}
-          directory. This will move the current{" "}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{" "}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </View>
+
+      <SectionList
+        sections={movieSections}
+        keyExtractor={(item, index) => item.id.toString() + index}
+        showsVerticalScrollIndicator={false}
+        stickyHeaderHiddenOnScroll
+        renderSectionHeader={({ section: { title } }) => (
+          <View className="px-4 pt-4">
+            <ThemedText type={'title'}>{title}</ThemedText>
+          </View>
+        )}
+        renderItem={({ item, section, index }) => {
+          // SectionList renders items vertically by default.
+          // To get a grid, you'd need complex logic here or render
+          // a non-scrollable grid view for the section's data.
+          // This simple example just renders one card per row:
+          return (
+            <View className="p-2">
+              <MovieCard movie={item} />
+            </View>
+          );
+        }}
+        stickySectionHeadersEnabled={true} // Optional: if you don't want sticky headers
+        className="flex-1" // Ensure it takes up available space
+      />
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
-  },
-});
