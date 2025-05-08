@@ -1,20 +1,20 @@
-import { Text, type TextProps } from "react-native";
-import { cva, type VariantProps } from "class-variance-authority";
+import { Text, type TextProps } from 'react-native';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
-const textVariants = cva("text-black dark:text-white", {
+const textVariants = cva('text-black dark:text-white', {
   variants: {
     type: {
-      default: "text-base",
-      defaultSemiBold: "text-base font-semibold",
-      title: "text-3xl font-bold",
-      subtitle: "text-xl font-bold",
-      link: "text-base text-accent-dark dark:text-accent-light underline",
+      default: 'text-base',
+      defaultSemiBold: 'text-base font-semibold',
+      title: 'text-3xl font-bold',
+      subtitle: 'text-xl font-bold',
+      link: 'text-base text-accent-dark underline dark:text-accent-light',
     },
   },
   defaultVariants: {
-    type: "default",
+    type: 'default',
   },
 });
 
