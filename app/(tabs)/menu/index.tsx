@@ -1,150 +1,88 @@
-import { Image, Pressable, SectionList, View } from 'react-native';
+import { ScrollView, View, Linking, Pressable } from 'react-native';
+import Constants from 'expo-constants';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
-import { fetchMovies } from '@/services/movies';
-import React from 'react';
+import { ThemedText } from '@/components/ThemedText';
 
-interface Movie {
-  id: number | string;
-  poster?: string | null;
-  title: string;
-  year: string | number;
-  rating: string | number;
-}
+const appVersion = Constants.expoConfig?.version || '1.0.0';
+const appName = 'Movie Discovery App';
 
-// Reusable Movie Card Component (Pure NativeWind)
-const MovieCard = ({ movie }: { movie: Movie }) => {
-  const router = useRouter();
+const GITHUB_REPO_URL = 'https://github.com/butadpj/react-native-expo-latest';
 
-  const handlePress = () => {
-    router.push({
-      pathname: `/(tabs)/(home)`,
-    }); // Navigate on press
-  };
-
-  // Determine image source, using placeholder if poster is missing
-  const imageSource = movie.poster
-    ? { uri: movie.poster }
-    : require('../../../assets/images/partial-react-logo.png');
-
+export default function MenuScreen() {
   return (
-    <Pressable
-      onPress={handlePress}
-      // Apply base styles and use `pressed:` variant for shadow change
-      // Use flex-1 to allow items to grow within the FlatList column structure
-      // Add margin for vertical gap between rows
-      className="border-border bg-card pressed:shadow-lg mb-4 flex-1 overflow-hidden rounded-lg border shadow" // mb-4 adds vertical gap
-      // Remove inline style for margin if mb-4 is sufficient
-      // style={{ margin: GAP / 2 }} // Alternative gap handling
-    >
-      {/* Image Container */}
-      <View className="relative aspect-video">
-        {/* Image using NativeWind for absolute positioning */}
-        <Image
-          source={imageSource}
-          alt={movie.title}
-          // Use NativeWind classes for fill effect
-          className="absolute inset-0 h-full w-full"
-          resizeMode="cover" // Equivalent to object-cover
-        />
-        {/* Rating Badge */}
-        <View className="absolute right-2 top-2">
-          <View className="rounded bg-black/70 px-1.5 py-0.5">
-            <ThemedText className="text-xs font-medium text-white">
-              {movie.rating}
+    <ThemedView className="flex-1">
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 30 }} // Add some padding at the bottom
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="p-6">
+          <ThemedText type="title" className="mb-2 text-center text-3xl">
+            {appName}
+          </ThemedText>
+          <ThemedText className="mb-8 text-center text-neutral-400">
+            Version {appVersion}
+          </ThemedText>
+
+          <View className="border-border mb-6 rounded-lg border bg-accent-light p-4 dark:bg-accent-dark">
+            <ThemedText type="subtitle" className="mb-2">
+              About This Project
+            </ThemedText>
+            <ThemedText className="text-sm leading-relaxed">
+              This application is a demonstration of building a movie discovery
+              app using modern React Native technologies. Showcasing features
+              like Styling, Dark mode, Data fetching, and Secure API key
+              handling.
+            </ThemedText>
+          </View>
+
+          <View className="border-border mb-6 rounded-lg border bg-accent-light p-4 dark:bg-accent-dark">
+            <ThemedText type="subtitle" className="mb-3">
+              Key Technologies Used
+            </ThemedText>
+            <View className="space-y-1.5">
+              <ThemedText className="text-sm">
+                • React Native (with Expo)
+              </ThemedText>
+              <ThemedText className="text-sm">• TypeScript</ThemedText>
+              <ThemedText className="text-sm">
+                • NativeWind (Tailwind CSS)
+              </ThemedText>
+              <ThemedText className="text-sm">
+                • TanStack Query (React Query)
+              </ThemedText>
+              <ThemedText className="text-sm">• Expo Router</ThemedText>
+              <ThemedText className="text-sm">
+                • Deno & Hono (Backend Proxy)
+              </ThemedText>
+              <ThemedText className="text-sm">
+                • TMDB API (for movie data)
+              </ThemedText>
+            </View>
+          </View>
+
+          <Pressable
+            onPress={() => Linking.openURL(GITHUB_REPO_URL)}
+            className="flex-row items-center justify-center space-x-2 rounded-lg bg-primary p-4 active:opacity-80"
+          >
+            <MaterialCommunityIcons
+              name="github"
+              size={24}
+              color="white" // Assuming primary button text is white
+            />
+            <ThemedText className="font-semibold text-white">
+              View on GitHub
+            </ThemedText>
+          </Pressable>
+
+          <View className="mt-10 items-center">
+            <ThemedText className="text-xs text-neutral-500">
+              Made with ❤️
             </ThemedText>
           </View>
         </View>
-      </View>
-
-      {/* Text Content */}
-      <View className="p-3">
-        <ThemedText
-          numberOfLines={1} // Equivalent to line-clamp-1
-          // Use `pressed:` variant for text color change
-          type={'subtitle'}
-          className="pressed:text-primary font-medium"
-        >
-          {movie.title}
-        </ThemedText>
-        <ThemedText className="text-muted-foreground text-sm">
-          {movie.year}
-        </ThemedText>
-      </View>
-    </Pressable>
-  );
-};
-
-export default function HomeScreen() {
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['movies'],
-    queryFn: fetchMovies,
-  });
-
-  const movieSections = React.useMemo(() => {
-    if (data?.results?.length) {
-      const mappedMovieData = data.results.map((movie: any) => {
-        return {
-          poster: movie.poster_path
-            ? `https://image.tmdb.org/t/p/original${movie.poster_path}`
-            : null,
-          year: movie.release_date ? movie.release_date.substring(0, 4) : 'N/A', // Extract year
-          rating: movie.vote_average?.toFixed(1) ?? 'N/A', // Format rating
-          ...movie,
-        };
-      });
-
-      return [
-        {
-          title: 'Popular movies',
-          data: mappedMovieData,
-        },
-
-        { title: 'New movies', data: mappedMovieData },
-      ];
-    }
-    return [];
-  }, [data?.results]);
-
-  return (
-    <ThemedView className="flex-1 px-4 pt-10">
-      <View className="mb-10">
-        <ThemedText type={'title'} className="text-4xl">
-          Discover
-        </ThemedText>
-      </View>
-
-      {isLoading ? (
-        <ThemedText>Loading...</ThemedText>
-      ) : isError ? ( // <-- Add this check
-        <ThemedText className="!text-red-500">
-          Error loading movies: {(error as Error)?.message || 'Unknown error'}
-        </ThemedText>
-      ) : (
-        <SectionList
-          sections={movieSections}
-          keyExtractor={(item, index) => item.id.toString() + index}
-          showsVerticalScrollIndicator={false}
-          stickyHeaderHiddenOnScroll
-          renderSectionHeader={({ section: { title } }) => (
-            <View className="px-4 pt-4">
-              <ThemedText type={'title'}>{title}</ThemedText>
-            </View>
-          )}
-          renderItem={({ item, section, index }) => {
-            return (
-              <View className="p-2">
-                <MovieCard movie={item} />
-              </View>
-            );
-          }}
-          stickySectionHeadersEnabled={true} // Optional: if you don't want sticky headers
-          className="flex-1" // Ensure it takes up available space
-        />
-      )}
+      </ScrollView>
     </ThemedView>
   );
 }
