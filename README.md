@@ -2,8 +2,10 @@
 
 A React Native Expo application for browsing popular and upcoming movies, viewing movie details, This project was built for learning and demonstration purposes.
 
-<img src="./assets/images/discover-ss.png" width="300"/>
-<img src="./assets/images/details-ss.png" width="300"/>
+<div style={{ display: "flex", gap: "1rem" }}>
+  <img src="./assets/images/discover-ss.png" width="300"/>
+  <img src="./assets/images/details-ss.png" width="300"/>
+</div>
 
 
 ## Technical Features
