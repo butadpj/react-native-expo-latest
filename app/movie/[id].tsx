@@ -1,13 +1,17 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { BackButton } from '@/components/ui/BackButton';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { formatRuntime } from '@/lib/utils';
+import { formatRuntime, getYouTubeThumbnail } from '@/lib/utils';
 import { fetchMovieDetails } from '@/services/movies';
 import { useQuery } from '@tanstack/react-query';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import {
   ActivityIndicator,
+  FlatList,
+  Image,
   ImageBackground,
+  Linking,
   Pressable,
   ScrollView,
   useColorScheme,
@@ -15,7 +19,6 @@ import {
 } from 'react-native';
 
 const MovieDetails = () => {
-  const router = useRouter();
   const params = useLocalSearchParams();
 
   const movieId = params.id as string;
@@ -71,30 +74,26 @@ const MovieDetails = () => {
   const genres = movie.genres?.map((g) => g.name).join(' • ') || '';
 
   const trailers =
-    movie.videos?.results.filter(
+    movie.videos?.results?.filter(
       (video: any) => video.type === 'Trailer' && video.site === 'YouTube',
     ) || [];
 
-  const cast = movie.credits?.cast.slice(0, 10) || []; // Show top 10 cast members
+  const cast = movie.credits?.cast?.slice(0, 10) || []; // Show top 10 cast members
 
   if (!movieId) {
     return (
       <ThemedView className="flex-1 items-center justify-center">
-        <ThemedText>Movie ID not found.</ThemedText>
+        <ThemedText className="!text-red-500">Movie ID not found.</ThemedText>
       </ThemedView>
     );
   }
   return (
     <ThemedView className="flex-1">
+      <BackButton />
+
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* --- Hero Section --- */}
-        <View className="relative">
-          <Pressable
-            onPress={() => router.back()}
-            className="absolute left-4 top-10 z-10 rounded-full bg-black/30 p-2"
-          >
-            <IconSymbol name="chevron.left" size={32} color="white" />
-          </Pressable>
+        <View>
           {backdropUrl ? (
             <ImageBackground
               source={{ uri: backdropUrl }}
@@ -159,8 +158,95 @@ const MovieDetails = () => {
               {genres}
             </ThemedText>
           )}
-          {/* Add more details like "Starring:" if you have full cast data */}
         </View>
+
+        {/* --- Trailers Section --- */}
+        {trailers.length > 0 && (
+          <View className="py-2">
+            <ThemedText type="subtitle" className="mb-2 px-4 text-xl">
+              Trailers & More
+            </ThemedText>
+            <FlatList
+              data={trailers}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{
+                paddingHorizontal: 16,
+                paddingBottom: 16,
+              }}
+              renderItem={({ item: video }) => (
+                <Pressable
+                  className="mr-3 aspect-video w-60 overflow-hidden rounded-md bg-neutral-800"
+                  onPress={() =>
+                    Linking.openURL(
+                      `https://www.youtube.com/watch?v=${video.key}`,
+                    )
+                  }
+                >
+                  <ImageBackground
+                    source={{ uri: getYouTubeThumbnail(video.key) }}
+                    className="h-full w-full items-center justify-center"
+                  >
+                    <IconSymbol
+                      name="play.circle.fill"
+                      size={48}
+                      color="rgba(255,255,255,0.8)"
+                    />
+                  </ImageBackground>
+                  <View className="absolute bottom-0 left-0 right-0 bg-black/50 p-1.5">
+                    <ThemedText className="text-xs" numberOfLines={1}>
+                      {video.name}
+                    </ThemedText>
+                  </View>
+                </Pressable>
+              )}
+            />
+          </View>
+        )}
+
+        {/* --- Cast Section --- */}
+        {cast.length > 0 && (
+          <View className="py-2">
+            <ThemedText type="subtitle" className="mb-2 px-4 text-xl">
+              Cast
+            </ThemedText>
+            <FlatList
+              data={cast}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.id.toString()}
+              contentContainerStyle={{
+                paddingHorizontal: 16,
+                paddingBottom: 16,
+              }}
+              renderItem={({ item: member }) => (
+                <View className="mr-3 w-24 items-center">
+                  <Image
+                    source={
+                      member.profile_path
+                        ? {
+                            uri: `https://image.tmdb.org/t/p/w300${member.profile_path}`,
+                          }
+                        : require('../../assets/images/partial-react-logo.png') // Your placeholder
+                    }
+                    className="mb-1 !h-20 !w-20 rounded-full bg-neutral-700"
+                    resizeMode="cover"
+                  />
+                  <ThemedText className="text-center text-xs" numberOfLines={2}>
+                    {member.name}
+                  </ThemedText>
+                  <ThemedText
+                    className="text-center text-xs text-neutral-400"
+                    numberOfLines={1}
+                  >
+                    {member.character}
+                  </ThemedText>
+                </View>
+              )}
+            />
+          </View>
+        )}
       </ScrollView>
     </ThemedView>
   );

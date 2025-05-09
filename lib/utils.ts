@@ -11,3 +11,6 @@ export const formatRuntime = (minutes: number | null | undefined): string => {
   const m = minutes % 60;
   return `${h > 0 ? `${h}h ` : ''}${m}m`;
 };
+
+export const getYouTubeThumbnail = (videoKey: string) =>
+  `https://img.youtube.com/vi/${videoKey}/mqdefault.jpg`;
