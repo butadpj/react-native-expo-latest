@@ -1,12 +1,10 @@
-import { Tabs } from "expo-router";
-import React from "react";
-import { Platform } from "react-native";
+import { Tabs } from 'expo-router';
+import React from 'react';
+import { Platform, useColorScheme, View } from 'react-native';
 
-import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { HapticTab } from '@/components/HapticTab';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { ThemedView } from '@/components/ThemedView';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -14,34 +12,34 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
+        tabBarBackground: () => <ThemedView className="w-full flex-1" />,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
+        tabBarActiveTintColor: colorScheme === 'dark' ? '#9084d2' : '#5209b0',
         tabBarStyle: Platform.select({
           ios: {
             // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
+            position: 'absolute',
           },
           default: {},
         }),
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="(home)/index"
         options={{
-          title: "Home",
+          title: 'Home',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="house.fill" color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="menu/index"
         options={{
-          title: "Explore",
+          title: 'Menu',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <IconSymbol size={28} name="menubar.rectangle" color={color} />
           ),
         }}
       />

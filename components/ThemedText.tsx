@@ -1,60 +1,28 @@
-import { StyleSheet, Text, type TextProps } from 'react-native';
+import { Text, type TextProps } from 'react-native';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { cn } from '@/lib/utils';
 
-export type ThemedTextProps = TextProps & {
-  lightColor?: string;
-  darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
-};
-
-export function ThemedText({
-  style,
-  lightColor,
-  darkColor,
-  type = 'default',
-  ...rest
-}: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-
-  return (
-    <Text
-      style={[
-        { color },
-        type === 'default' ? styles.default : undefined,
-        type === 'title' ? styles.title : undefined,
-        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
-        type === 'subtitle' ? styles.subtitle : undefined,
-        type === 'link' ? styles.link : undefined,
-        style,
-      ]}
-      {...rest}
-    />
-  );
-}
-
-const styles = StyleSheet.create({
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
+const textVariants = cva('text-black dark:text-white', {
+  variants: {
+    type: {
+      default: 'text-base',
+      defaultSemiBold: 'text-base font-semibold',
+      title: 'text-3xl font-bold',
+      subtitle: 'text-xl font-bold',
+      link: 'text-base text-accent-dark underline dark:text-accent-light',
+    },
   },
-  defaultSemiBold: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '600',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    lineHeight: 32,
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  link: {
-    lineHeight: 30,
-    fontSize: 16,
-    color: '#0a7ea4',
+  defaultVariants: {
+    type: 'default',
   },
 });
+
+export type ThemedTextProps = TextProps &
+  VariantProps<typeof textVariants> & {
+    className?: string;
+  };
+
+export function ThemedText({ className, type, ...rest }: ThemedTextProps) {
+  return <Text className={cn(textVariants({ type }), className)} {...rest} />;
+}
