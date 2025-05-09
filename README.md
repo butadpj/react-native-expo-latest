@@ -14,6 +14,7 @@ A React Native Expo application for browsing popular and upcoming movies, viewin
 *   Efficient data fetching with TanStack Query (React Query).
 *   Secure API key handling with Deno backend proxy.
 *   Styling with NativeWind.
+*   Dark mode
 
 ## Prerequisites
 
@@ -98,11 +99,14 @@ router.push({
 2.  **`SectionList` Rendering Multiple Carousels:** Initially, the `renderItem` of `SectionList` was being called for every movie, creating many horizontal lists instead of one per section.
     *   **Fix:** Restructured the `data` prop for each section in `SectionList` to contain a single item. 
 
+3. **Implementing Dark mode:** Up until now I'm still not sure how to make Nativewind's approach to dark mode work with native. On web version, it works fine
+
 ## Future Enhancements
 
 *   Implement search functionality.
 *   Offline caching/support.
 *   Video playback for trailers within the app.
+*   Fix dark mode toggle issue on native
 
 ## Tech Stack
 
